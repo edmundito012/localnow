@@ -4,7 +4,7 @@ LocalNow is an on-demand marketplace for finding nearby, trusted professionals w
 
 The initial product is focused on urgent and same-day home repairs in Madrid, starting with plumbing, electrical work, and locksmith services.
 
-> **Status:** product definition and technical foundation.
+> **Status:** backend foundation in progress.
 
 ## Why LocalNow?
 
@@ -96,6 +96,29 @@ localnow/
 ├── backend/       # Kotlin/Spring Boot modular monolith
 ├── docs/          # Product and technical documentation
 └── infra/         # Local and deployment infrastructure
+```
+
+## Local Development
+
+Requirements:
+
+- Java 21
+- Docker with Compose
+
+Start PostgreSQL with PostGIS and then run the backend:
+
+```bash
+docker compose up -d postgres
+cd backend
+./gradlew bootRun
+```
+
+Verify the service at `http://localhost:8080/actuator/health`.
+
+Run the test suite from `backend/`:
+
+```bash
+./gradlew test
 ```
 
 ## Product Scope
