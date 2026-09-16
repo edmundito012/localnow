@@ -1,0 +1,11 @@
+package com.localnow.identity.persistence
+
+import com.localnow.identity.domain.User
+import org.springframework.data.jpa.repository.JpaRepository
+import java.util.UUID
+
+interface UserRepository : JpaRepository<User, UUID> {
+    fun findByEmail(email: String): User?
+
+    fun existsByEmail(email: String): Boolean
+}
