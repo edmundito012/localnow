@@ -31,9 +31,13 @@ class RegisterUserService(
             throw EmailAlreadyRegisteredException(normalizedEmail)
         }
 
+        val passwordHash = requireNotNull(passwordEncoder.encode(command.rawPassword)) {
+            "Password encoder returned no hash"
+        }
+
         val user = User.create(
             email = normalizedEmail,
-            passwordHash = passwordEncoder.encode(command.rawPassword),
+            passwordHash = passwordHash,
             roles = command.roles,
         )
 
