@@ -5,7 +5,7 @@ CREATE TABLE professional_availability (
     id UUID PRIMARY KEY,
     professional_user_id UUID NOT NULL
         REFERENCES professional_profile(user_id) ON DELETE CASCADE,
-    day_of_week SMALLINT NOT NULL,
+    day_of_week INTEGER NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     CONSTRAINT professional_availability_day_valid
