@@ -113,8 +113,10 @@ class AuthControllerIntegrationTest(
             jsonPath("$.passwordHash") { doesNotExist() }
         }.andReturn().response.contentAsString
 
-        val token = requireNotNull(Regex("\\"accessToken\\":\\"([^\\"]+)\\"").find(loginBody))
-            .groupValues[1]
+        val token = loginBody
+            .substringAfter("\"accessToken\":\"")
+            .substringBefore("\"")
+        require(token.isNotBlank()) { "Login response does not contain an access token" }
 
         mockMvc.get("/api/v1/auth/me") {
             header(HttpHeaders.AUTHORIZATION, "Bearer $token")
