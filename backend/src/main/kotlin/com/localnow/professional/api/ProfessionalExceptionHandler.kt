@@ -1,6 +1,7 @@
 package com.localnow.professional.api
 
 import com.localnow.identity.api.ApiError
+import com.localnow.professional.application.InvalidAvailabilityException
 import com.localnow.professional.application.ProfessionalPhoneAlreadyRegisteredException
 import com.localnow.professional.application.ProfessionalProfileAlreadyExistsException
 import com.localnow.professional.application.ProfessionalProfileNotFoundException
@@ -38,6 +39,13 @@ class ProfessionalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleUnknownCategories(exception: UnknownServiceCategoriesException) = ApiError(
         code = "UNKNOWN_SERVICE_CATEGORIES",
+        message = requireNotNull(exception.message),
+    )
+
+    @ExceptionHandler(InvalidAvailabilityException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleInvalidAvailability(exception: InvalidAvailabilityException) = ApiError(
+        code = "INVALID_AVAILABILITY",
         message = requireNotNull(exception.message),
     )
 }

@@ -35,6 +35,9 @@ class ProfessionalProfile private constructor(
     @Column(name = "category_code", nullable = false, length = 50)
     val categoryCodes: MutableSet<String>,
 
+    @Column(name = "time_zone", length = 50)
+    var timeZone: String?,
+
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: Instant,
 
@@ -44,6 +47,11 @@ class ProfessionalProfile private constructor(
     fun replaceCategories(codes: Set<String>, now: Instant = Instant.now()) {
         categoryCodes.clear()
         categoryCodes.addAll(codes)
+        updatedAt = now
+    }
+
+    fun setAvailabilityTimeZone(zoneId: String, now: Instant = Instant.now()) {
+        timeZone = zoneId
         updatedAt = now
     }
 
@@ -68,6 +76,7 @@ class ProfessionalProfile private constructor(
                 phone = normalizedPhone,
                 bio = normalizedBio,
                 categoryCodes = mutableSetOf(),
+                timeZone = null,
                 createdAt = now,
                 updatedAt = now,
             )

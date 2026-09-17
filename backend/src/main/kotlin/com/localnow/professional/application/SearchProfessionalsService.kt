@@ -4,6 +4,7 @@ import com.localnow.professional.persistence.ProfessionalSearchProjection
 import com.localnow.professional.persistence.ProfessionalProfileRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 
 @Service
 class SearchProfessionalsService(
@@ -16,11 +17,25 @@ class SearchProfessionalsService(
         longitude: Double,
         radiusMeters: Int,
         categoryCode: String,
-    ): List<ProfessionalSearchProjection> =
-        professionalProfileRepository.searchNearby(
-            latitude = latitude,
-            longitude = longitude,
-            radiusMeters = radiusMeters,
-            categoryCode = categoryCode.trim().uppercase(),
-        )
+        availableAt: Instant?,
+    ): List<ProfessionalSearchProjection> {
+        val normalizedCategory = categoryCode.trim().uppercase()
+
+        return if (availableAt == null) {
+            professionalProfileRepository.searchNearby(
+                latitude = latitude,
+                longitude = longitude,
+                radiusMeters = radiusMeters,
+                categoryCode = normalizedCategory,
+            )
+        } else {
+            professionalProfileRepository.searchNearbyAvailable(
+                latitude = latitude,
+                longitude = longitude,
+                radiusMeters = radiusMeters,
+                categoryCode = normalizedCategory,
+                availableAt = availableAt,
+            )
+        }
+    }
 }
