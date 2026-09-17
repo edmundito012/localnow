@@ -81,4 +81,48 @@ class AuthControllerIntegrationTest(
             jsonPath("$.fieldErrors.length()") { value(2) }
         }
     }
+
+    @Test
+    fun `logs in with valid credentials without exposing the password hash`() {
+        val registerBody = """
+            {
+              "email": "login.api@example.com",
+              "password": "correct-password"
+            }
+        """.trimIndent()
+
+        mockMvc.post("/api/v1/auth/register") {
+            contentType = MediaType.APPLICATION_JSON
+            content = registerBody
+        }.andExpect {
+            status { isCreated() }
+        }
+
+        mockMvc.post("/api/v1/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = registerBody
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.email") { value("login.api@example.com") }
+            jsonPath("$.roles[0]") { value("CUSTOMER") }
+            jsonPath("$.passwordHash") { doesNotExist() }
+        }
+    }
+
+    @Test
+    fun `returns unauthorized for invalid credentials`() {
+        mockMvc.post("/api/v1/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+                {
+                  "email": "unknown@example.com",
+                  "password": "incorrect-password"
+                }
+            """.trimIndent()
+        }.andExpect {
+            status { isUnauthorized() }
+            jsonPath("$.code") { value("INVALID_CREDENTIALS") }
+            jsonPath("$.message") { value("Email or password is incorrect") }
+        }
+    }
 }

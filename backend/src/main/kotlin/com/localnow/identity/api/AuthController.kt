@@ -1,5 +1,7 @@
 package com.localnow.identity.api
 
+import com.localnow.identity.application.AuthenticateUserCommand
+import com.localnow.identity.application.AuthenticateUserService
 import com.localnow.identity.application.RegisterUserCommand
 import com.localnow.identity.application.RegisterUserService
 import jakarta.validation.Valid
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/auth")
 class AuthController(
     private val registerUserService: RegisterUserService,
+    private val authenticateUserService: AuthenticateUserService,
 ) {
 
     @PostMapping("/register")
@@ -27,5 +30,21 @@ class AuthController(
         )
 
         return RegisterUserResponse(userId)
+    }
+
+    @PostMapping("/login")
+    fun login(@Valid @RequestBody request: LoginRequest): LoginResponse {
+        val authenticatedUser = authenticateUserService.authenticate(
+            AuthenticateUserCommand(
+                email = request.email,
+                rawPassword = request.password,
+            ),
+        )
+
+        return LoginResponse(
+            userId = authenticatedUser.userId,
+            email = authenticatedUser.email,
+            roles = authenticatedUser.roles,
+        )
     }
 }
