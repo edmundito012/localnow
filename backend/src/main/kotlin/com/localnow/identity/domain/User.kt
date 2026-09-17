@@ -43,6 +43,12 @@ class User private constructor(
     @Column(name = "updated_at", nullable = false)
     var updatedAt: Instant,
 ) {
+    fun addRole(role: UserRole, now: Instant = Instant.now()) {
+        if (roles.add(role)) {
+            updatedAt = now
+        }
+    }
+
     companion object {
         fun create(
             email: String,
