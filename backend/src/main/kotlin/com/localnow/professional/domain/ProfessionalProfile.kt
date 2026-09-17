@@ -1,8 +1,12 @@
 package com.localnow.professional.domain
 
+import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
+import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.Table
 import java.time.Instant
 import java.util.UUID
@@ -23,12 +27,26 @@ class ProfessionalProfile private constructor(
     @Column(length = 1000)
     val bio: String?,
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "professional_service_category",
+        joinColumns = [JoinColumn(name = "professional_user_id")],
+    )
+    @Column(name = "category_code", nullable = false, length = 50)
+    val categoryCodes: MutableSet<String>,
+
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: Instant,
 
     @Column(name = "updated_at", nullable = false)
-    val updatedAt: Instant,
+    var updatedAt: Instant,
 ) {
+    fun replaceCategories(codes: Set<String>, now: Instant = Instant.now()) {
+        categoryCodes.clear()
+        categoryCodes.addAll(codes)
+        updatedAt = now
+    }
+
     companion object {
         fun create(
             userId: UUID,
@@ -49,6 +67,7 @@ class ProfessionalProfile private constructor(
                 displayName = normalizedName,
                 phone = normalizedPhone,
                 bio = normalizedBio,
+                categoryCodes = mutableSetOf(),
                 createdAt = now,
                 updatedAt = now,
             )
