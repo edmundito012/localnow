@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.transaction.annotation.Transactional
 
@@ -83,7 +85,7 @@ class AuthControllerIntegrationTest(
     }
 
     @Test
-    fun `logs in with valid credentials without exposing the password hash`() {
+    fun `returns a bearer token for valid credentials and accepts it on protected endpoints`() {
         val registerBody = """
             {
               "email": "login.api@example.com",
@@ -98,14 +100,35 @@ class AuthControllerIntegrationTest(
             status { isCreated() }
         }
 
-        mockMvc.post("/api/v1/auth/login") {
+        val loginBody = mockMvc.post("/api/v1/auth/login") {
             contentType = MediaType.APPLICATION_JSON
             content = registerBody
         }.andExpect {
             status { isOk() }
             jsonPath("$.email") { value("login.api@example.com") }
             jsonPath("$.roles[0]") { value("CUSTOMER") }
+            jsonPath("$.accessToken") { isNotEmpty() }
+            jsonPath("$.tokenType") { value("Bearer") }
+            jsonPath("$.expiresInSeconds") { value(900) }
             jsonPath("$.passwordHash") { doesNotExist() }
+        }.andReturn().response.contentAsString
+
+        val token = requireNotNull(Regex("\\"accessToken\\":\\"([^\\"]+)\\"").find(loginBody))
+            .groupValues[1]
+
+        mockMvc.get("/api/v1/auth/me") {
+            header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.email") { value("login.api@example.com") }
+            jsonPath("$.roles[0]") { value("CUSTOMER") }
+        }
+    }
+
+    @Test
+    fun `rejects protected endpoints without a bearer token`() {
+        mockMvc.get("/api/v1/auth/me").andExpect {
+            status { isUnauthorized() }
         }
     }
 

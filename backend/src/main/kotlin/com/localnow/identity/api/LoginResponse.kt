@@ -7,4 +7,7 @@ data class LoginResponse(
     val userId: UUID,
     val email: String,
     val roles: Set<UserRole>,
+    val accessToken: String,
+    val tokenType: String = "Bearer",
+    val expiresInSeconds: Long,
 )

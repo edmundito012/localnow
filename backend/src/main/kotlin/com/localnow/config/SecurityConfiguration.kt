@@ -29,7 +29,7 @@ class SecurityConfiguration {
                     ).permitAll()
                     .anyRequest().authenticated()
             }
-            .httpBasic(withDefaults())
+            .oauth2ResourceServer { resourceServer -> resourceServer.jwt(withDefaults()) }
 
         return http.build()
     }
