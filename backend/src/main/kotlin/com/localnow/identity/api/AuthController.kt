@@ -63,7 +63,11 @@ class AuthController(
     fun currentUser(@AuthenticationPrincipal jwt: Jwt): CurrentUserResponse =
         CurrentUserResponse(
             userId = UUID.fromString(jwt.subject),
-            email = jwt.getClaimAsString("email"),
-            roles = jwt.getClaimAsStringList("roles"),
+            email = requireNotNull(jwt.getClaimAsString("email")) {
+                "Authenticated JWT does not contain an email claim"
+            },
+            roles = requireNotNull(jwt.getClaimAsStringList("roles")) {
+                "Authenticated JWT does not contain a roles claim"
+            },
         )
 }
