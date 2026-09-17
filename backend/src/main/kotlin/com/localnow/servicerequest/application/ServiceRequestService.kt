@@ -71,6 +71,8 @@ class ServiceRequestService(
             radiusMeters = radiusMeters,
             categoryCode = request.categoryCode,
             availableAt = request.requestedAt,
-        )
+        ).filter { candidate ->
+            candidate.getUserId() != customerUserId
+        }
     }
 }
